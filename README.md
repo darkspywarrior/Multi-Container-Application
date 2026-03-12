@@ -1,33 +1,73 @@
 # Multi-Container-Application
 [Multi-Container Application Project](https://roadmap.sh/projects/multi-container-service)
-The goal of this project is to practice using Docker Compose to run a multi-container application in production. You will use Docker Compose to run a Node.js application and a MongoDB database.
 
-Requirements
-Create a simple unauthenticated Node.js API service for creating a simple todo list. The API should have the following endpoints:
+A simple full-stack Todo List application using **Docker Compose** with a **Node.js + Express + Mongoose** backend and **MongoDB** database.
 
-GET /todos — get all todos
+This project demonstrates:
 
-POST /todos — create a new todo
+- Multi-container Docker setup with Docker Compose
+- Persistent data storage using Docker volumes
+- Local development with hot-reloading (nodemon)
+- Production-grade deployment preparation (remote server + CI/CD)
+- (Bonus) Reverse proxy setup with Nginx
 
-GET /todos/:id — get a single todo by id
+## Features
 
-PUT /todos/:id — update a single todo by id
+- REST API for managing todos
+- MongoDB persistence
+- Dockerized services
+- Ready for cloud deployment (DigitalOcean, AWS, etc.)
 
-DELETE /todos/:id — delete a single todo by id
+## API Endpoints
 
-The API should connect to MongoDB to store the todo items. You can use Express for the API and Mongoose to connect to MongoDB. You can use nodemon to automatically restart the server when the source code changes.
+| Method | Endpoint          | Description                     | Body (JSON)                     |
+|--------|-------------------|---------------------------------|---------------------------------|
+| GET    | `/todos`          | Get all todos                   | —                               |
+| POST   | `/todos`          | Create a new todo               | `{ "title": "Buy milk", "completed": false }` |
+| GET    | `/todos/:id`      | Get a single todo by ID         | —                               |
+| PUT    | `/todos/:id`      | Update a todo                   | `{ "title": "...", "completed": true }` |
+| DELETE | `/todos/:id`      | Delete a todo                   | —                               |
 
-Requirement #1 - Dockerize the API
-You are required to dockerize the API and have a docker-compose.yml file which will spin up a MongoDB container and the API container. If everything works, you should be able to access the API via http://localhost:3000 and the todos should be saved to the MongoDB container. Data should be persisted when the containers are stopped and started.
+## Project Requirements
 
-Requirement #2 - Setup a remote server
-Setup a remote server on Digital Ocean, AWS or any other cloud provider. You should use terraform to create the server and Ansible to configure it properly i.e. setup docker, docker-compose, pulling the image from Docker Hub and running the containers.
+### Requirement 1 – Dockerize the Application
 
-Requirement #3 - Setup a CI/CD pipeline
-Once you have everything working locally, push your code to GitHub and setup a CI/CD pipeline to deploy the application to the remote server. You can use GitHub Actions to setup the pipeline. Make sure to use docker-compose to run the application in the production environment.
+- Create a **Node.js + Express** REST API
+- Use **Mongoose** to connect to MongoDB
+- Use **nodemon** for development
+- Write a `Dockerfile` for the API
+- Create a `docker-compose.yml` that runs:
+  - `api` service (Node.js)
+  - `mongo` service (MongoDB)
+- Use **named volume** for MongoDB data persistence
+- API should be available at: `http://localhost:3000`
 
-Bonus - Setup a reverse proxy
-Setup a reverse proxy using Nginx to allow you to access the application via http://your_domain.com. You should use docker-compose to setup the reverse proxy.
+### Requirement 2 – Remote Server Setup (Infrastructure as Code)
+
+- Provision a remote server using **Terraform** (DigitalOcean, AWS EC2, etc.)
+- Use **Ansible** to:
+  - Install Docker & Docker Compose
+  - Copy necessary files / environment variables
+  - Pull images from Docker Hub (if using)
+  - Start the application with `docker-compose up -d`
+
+### Requirement 3 – CI/CD Pipeline
+
+- Push code to **GitHub**
+- Create **GitHub Actions** workflow that:
+  - Builds and pushes Docker image to Docker Hub (optional)
+  - SSH into the remote server
+  - Pulls latest code / image
+  - Runs `docker-compose up -d` (or similar)
+
+### Bonus – Reverse Proxy with Nginx
+
+- Add an **Nginx** service in `docker-compose.yml`
+- Configure Nginx to proxy requests to the Node.js API
+- Access the application via domain name[](http://your-domain.com)
+
+## Project Structure (Recommended)
+cation via http://your_domain.com. You should use docker-compose to setup the reverse proxy.
 
 After completing this project, you will have a good understanding of Docker Compose, multi-container applications, CI/CD pipelines, and more.
 
