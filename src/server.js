@@ -6,7 +6,14 @@ const app = express();
 
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URL || "mongodb://localhost:27017/todos");
+const mongoURL = process.env.MONGO_URL;
+
+mongoose.connect(mongoURL, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.error("MongoDB connection error:", err));
 
 app.use("/", todoRoutes);
 
