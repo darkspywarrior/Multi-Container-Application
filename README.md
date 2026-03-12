@@ -67,7 +67,7 @@ This project demonstrates:
 - Access the application via domain name[](http://your-domain.com)
 
 ## Project Structure (Recommended)
-cation via http://your_domain.com. You should use docker-compose to setup the reverse proxy.
+Setup a reverse proxy using Nginx to allow you to access the application via http://your_domain.com. You should use docker-compose to setup the reverse proxy.
 
 After completing this project, you will have a good understanding of Docker Compose, multi-container applications, CI/CD pipelines, and more.
 
