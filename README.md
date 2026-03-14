@@ -3,9 +3,6 @@
 
 A simple full-stack Todo List application using **Docker Compose** with a **Node.js + Express + Mongoose** backend and **MongoDB** database.
 PART-2
-# 🚀 Todo App with Docker & Nginx  
-**My Computer Science Portfolio Project**
-
 A fun, fully containerized Todo REST API I built to learn real DevOps practices!  
 It uses multiple Docker containers, a reverse proxy, and clean code — exactly what I wanted to show in my portfolio.
 
