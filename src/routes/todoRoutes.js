@@ -27,5 +27,17 @@ router.delete("/todos/:id", async (req, res) => {
   await Todo.findByIdAndDelete(req.params.id);
   res.json({message:"Deleted"});
 });
+const mongoose = require("mongoose");
+
+router.get("/todos/:id", async (req, res) => {
+  const id = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "Invalid Todo ID" });
+  }
+
+  const todo = await Todo.findById(id);
+  res.json(todo);
+});
 
 module.exports = router;
