@@ -5,12 +5,26 @@ const mongoose = require("mongoose");
 
 /**
  * @swagger
+ * tags:
+ *   name: Todos
+ *   description: Todo management API
+ */
+
+/**
+ * @swagger
  * /todos:
  *   get:
  *     summary: Get all todos
+ *     tags: [Todos]
  *     responses:
  *       200:
  *         description: List of todos
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Todo'
  */
 router.get("/todos", async (req, res) => {
   const todos = await Todo.find();
@@ -22,8 +36,13 @@ router.get("/todos", async (req, res) => {
  * /todos:
  *   post:
  *     summary: Create a new todo
+ *     tags: [Todos]
  *     requestBody:
  *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoInput'
  *     responses:
  *       201:
  *         description: Todo created
@@ -39,6 +58,16 @@ router.post("/todos", async (req, res) => {
  * /todos/{id}:
  *   get:
  *     summary: Get a todo by ID
+ *     tags: [Todos]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Todo object
  */
 router.get("/todos/:id", async (req, res) => {
 
@@ -57,6 +86,22 @@ router.get("/todos/:id", async (req, res) => {
  * /todos/{id}:
  *   put:
  *     summary: Update a todo
+ *     tags: [Todos]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/TodoInput'
+ *     responses:
+ *       200:
+ *         description: Updated todo
  */
 router.put("/todos/:id", async (req, res) => {
 
@@ -74,6 +119,16 @@ router.put("/todos/:id", async (req, res) => {
  * /todos/{id}:
  *   delete:
  *     summary: Delete a todo
+ *     tags: [Todos]
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Todo deleted
  */
 router.delete("/todos/:id", async (req, res) => {
 

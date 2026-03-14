@@ -6,13 +6,50 @@ const options = {
     info: {
       title: "Todo DevOps API",
       version: "1.0.0",
-      description: "API documentation for the multi-container todo application",
+      description: "Todo API with Docker, CI/CD, Monitoring and Swagger documentation"
     },
     servers: [
       {
-        url: "http://localhost:3000"
+        url: "http://localhost:3000",
+        description: "Local server"
       }
-    ]
+    ],
+    components: {
+      schemas: {
+        Todo: {
+          type: "object",
+          required: ["title"],
+          properties: {
+            _id: {
+              type: "string",
+              example: "664eab4cdd91234abc123456"
+            },
+            title: {
+              type: "string",
+              example: "Learn Docker"
+            },
+            completed: {
+              type: "boolean",
+              example: false
+            }
+          }
+        },
+        TodoInput: {
+          type: "object",
+          required: ["title"],
+          properties: {
+            title: {
+              type: "string",
+              example: "Learn DevOps"
+            },
+            completed: {
+              type: "boolean",
+              example: false
+            }
+          }
+        }
+      }
+    }
   },
   apis: ["./src/routes/*.js"]
 };
