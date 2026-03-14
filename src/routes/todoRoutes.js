@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Todo = require("../models/Todo");
+const mongoose = require("mongoose");
 
-router.get("/todos", async (req, res) => {
-  const todos = await Todo.find();
-  res.json(todos);
-});
 /**
  * @swagger
  * /todos:
@@ -15,45 +12,36 @@ router.get("/todos", async (req, res) => {
  *       200:
  *         description: List of todos
  */
+router.get("/todos", async (req, res) => {
+  const todos = await Todo.find();
+  res.json(todos);
+});
 
-router.get("/todos", getTodos);
 /**
  * @swagger
  * /todos:
  *   post:
- *     summary: Create a todo
+ *     summary: Create a new todo
  *     requestBody:
  *       required: true
  *     responses:
  *       201:
  *         description: Todo created
  */
-
-router.post("/todos", createTodo);
-
 router.post("/todos", async (req, res) => {
   const todo = new Todo(req.body);
   await todo.save();
-  res.json(todo);
+  res.status(201).json(todo);
 });
 
+/**
+ * @swagger
+ * /todos/{id}:
+ *   get:
+ *     summary: Get a todo by ID
+ */
 router.get("/todos/:id", async (req, res) => {
-  const todo = await Todo.findById(req.params.id);
-  res.json(todo);
-});
 
-router.put("/todos/:id", async (req, res) => {
-  const todo = await Todo.findByIdAndUpdate(req.params.id, req.body, {new:true});
-  res.json(todo);
-});
-
-router.delete("/todos/:id", async (req, res) => {
-  await Todo.findByIdAndDelete(req.params.id);
-  res.json({message:"Deleted"});
-});
-const mongoose = require("mongoose");
-
-router.get("/todos/:id", async (req, res) => {
   const id = req.params.id;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -62,6 +50,36 @@ router.get("/todos/:id", async (req, res) => {
 
   const todo = await Todo.findById(id);
   res.json(todo);
+});
+
+/**
+ * @swagger
+ * /todos/{id}:
+ *   put:
+ *     summary: Update a todo
+ */
+router.put("/todos/:id", async (req, res) => {
+
+  const todo = await Todo.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
+
+  res.json(todo);
+});
+
+/**
+ * @swagger
+ * /todos/{id}:
+ *   delete:
+ *     summary: Delete a todo
+ */
+router.delete("/todos/:id", async (req, res) => {
+
+  await Todo.findByIdAndDelete(req.params.id);
+
+  res.json({ message: "Deleted" });
 });
 
 module.exports = router;
