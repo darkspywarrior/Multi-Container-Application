@@ -18,6 +18,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+  nginx:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api
 
 volumes:
   mongo-data:
