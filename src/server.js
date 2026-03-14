@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const todoRoutes = require("./routes/todoRoutes");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
 const app = express();
 app.use(express.json());
@@ -10,7 +12,7 @@ const PORT = process.env.PORT || 3000;
 
 // MongoDB Atlas connection string from Render environment variable
 const mongoURL = process.env.MONGO_URL;
-
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // Health check route (useful for Render or load balancers)
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
@@ -34,6 +36,7 @@ async function startServer() {
 
     const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
+      console.log(`📚 Swagger Docs available at /api-docs`);
     });
 
     // Graceful shutdown

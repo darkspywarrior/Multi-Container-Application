@@ -6,6 +6,30 @@ router.get("/todos", async (req, res) => {
   const todos = await Todo.find();
   res.json(todos);
 });
+/**
+ * @swagger
+ * /todos:
+ *   get:
+ *     summary: Get all todos
+ *     responses:
+ *       200:
+ *         description: List of todos
+ */
+
+router.get("/todos", getTodos);
+/**
+ * @swagger
+ * /todos:
+ *   post:
+ *     summary: Create a todo
+ *     requestBody:
+ *       required: true
+ *     responses:
+ *       201:
+ *         description: Todo created
+ */
+
+router.post("/todos", createTodo);
 
 router.post("/todos", async (req, res) => {
   const todo = new Todo(req.body);
