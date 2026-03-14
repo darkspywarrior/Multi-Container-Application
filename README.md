@@ -1,95 +1,352 @@
 # Multi-Container-Application
 [Multi-Container Application Project](https://roadmap.sh/projects/multi-container-service)
 
-A simple full-stack Todo List application using **Docker Compose** with a **Node.js + Express + Mongoose** backend and **MongoDB** database.
-PART-2
-A fun, fully containerized Todo REST API I built to learn real DevOps practices!  
-It uses multiple Docker containers, a reverse proxy, and clean code — exactly what I wanted to show in my portfolio.
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
+![Node.js](https://img.shields.io/badge/Node.js-Backend-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-Database-green)
+![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-orange)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-Perfect for anyone who wants to see how a simple app can be made modern and clean using Docker.
+A **production-style Todo API** built with **Node.js, Express, MongoDB, Docker, Nginx, Swagger, Prometheus, and Grafana**.
 
-## ✨ What I Built
-- REST API for managing todos (create, read, update, delete)
-- MongoDB for persistent storage
-- Docker + Docker Compose for easy multi-container setup
-- Nginx as a reverse proxy (clean URLs + extra security practice)
-- Swagger UI for interactive API testing right in the browser
+This project demonstrates **real-world DevOps practices**, including:
 
-## 🛠 Tech Stack
+* Containerization with Docker
+* Multi-container orchestration with Docker Compose
+* Reverse proxy configuration with Nginx
+* API documentation using Swagger
+* Monitoring using Prometheus and Grafana
+* CI/CD automation using GitHub Actions
 
-| Technology       | Purpose                     |
-|------------------|-----------------------------|
-| Node.js + Express| Backend API                 |
-| MongoDB + Mongoose | Database & modeling      |
-| Docker           | Containerization            |
-| Docker Compose   | Multi-container orchestration |
-| Nginx            | Reverse proxy               |
-| Swagger          | Interactive API documentation |
+This project is designed as a **DevOps portfolio project** demonstrating how modern applications are built and deployed.
 
-## 🏗 Architecture (Super Simple)
-Browser
-↓
-Nginx (Reverse Proxy on port 80)
-↓
-Node.js API (Express)
-↓
-MongoDB
-## 📡 API Endpoints
+---
 
-| Method | Endpoint          | What it does          |
-|--------|-------------------|-----------------------|
-| GET    | `/todos`          | Get all todos         |
-| POST   | `/todos`          | Create a new todo     |
-| GET    | `/todos/:id`      | Get one todo          |
-| PUT    | `/todos/:id`      | Update a todo         |
-| DELETE | `/todos/:id`      | Delete a todo         |
+# 📦 Tech Stack
 
+| Technology     | Purpose                       |
+| -------------- | ----------------------------- |
+| Node.js        | Backend runtime               |
+| Express        | REST API framework            |
+| MongoDB        | NoSQL database                |
+| Mongoose       | MongoDB ODM                   |
+| Docker         | Containerization              |
+| Docker Compose | Multi-container orchestration |
+| Nginx          | Reverse proxy                 |
+| Swagger        | API documentation             |
+| Prometheus     | Metrics collection            |
+| Grafana        | Monitoring dashboards         |
+| GitHub Actions | CI/CD automation              |
 
-📘 API Documentation
-Just open this in your browser after running the app:
-http://localhost/api-docs
-You can test every endpoint directly — no Postman needed!
-📁 Project Structure
-texttodo-app-docker/
-├── src/
-│   ├── models/Todo.js
-│   ├── routes/todoRoutes.js
+---
+
+# 🏗 System Architecture
+
+```
+Client / Browser
+        │
+        ▼
+   Nginx Reverse Proxy
+        │
+        ▼
+   Node.js API (Express)
+        │
+        ▼
+      MongoDB
+        │
+        ▼
+Monitoring Stack
+ ├── Prometheus
+ └── Grafana
+```
+
+CI/CD Pipeline:
+
+```
+Developer
+   │
+   ▼
+GitHub Repository
+   │
+   ▼
+GitHub Actions
+   │
+   ▼
+Docker Build & Deployment
+```
+
+---
+
+# ✨ Features
+
+* Full **CRUD REST API**
+* **MongoDB persistence**
+* **Dockerized services**
+* **Multi-container architecture**
+* **Swagger interactive API documentation**
+* **Reverse proxy with Nginx**
+* **Monitoring dashboards**
+* **CI/CD pipeline**
+* **Health check endpoints**
+
+---
+
+# 📡 API Endpoints
+
+| Method | Endpoint      | Description    |
+| ------ | ------------- | -------------- |
+| GET    | `/todos`      | Get all todos  |
+| POST   | `/todos`      | Create a todo  |
+| GET    | `/todos/{id}` | Get todo by ID |
+| PUT    | `/todos/{id}` | Update todo    |
+| DELETE | `/todos/{id}` | Delete todo    |
+
+---
+
+# 🧪 Example API Request
+
+Create a Todo:
+
+```json
+{
+  "title": "Learn DevOps",
+  "completed": false
+}
+```
+
+---
+
+# 📘 API Documentation (Swagger)
+
+Swagger provides interactive API documentation.
+
+Open:
+
+```
+http://localhost:3000/api-docs
+```
+
+You can:
+
+* Test API requests
+* Send POST/PUT bodies
+* View responses
+* Explore endpoints
+
+---
+
+# 📊 Monitoring
+
+The monitoring stack includes **Prometheus + Grafana**.
+
+### Prometheus
+
+Metrics collection service.
+
+```
+http://localhost:9090
+```
+
+### Grafana
+
+Visualization dashboard.
+
+```
+http://localhost:3001
+```
+
+Default login:
+
+```
+username: admin
+password: admin
+```
+
+---
+
+# 📁 Project Structure
+
+```
+Multi-Container-Application
+│
+├── src
+│   ├── models
+│   │   └── Todo.js
+│   │
+│   ├── routes
+│   │   └── todoRoutes.js
+│   │
 │   ├── server.js
 │   └── swagger.js
-├── nginx/
+│
+├── nginx
 │   └── nginx.conf
+│
 ├── docker-compose.yml
 ├── Dockerfile
 ├── package.json
 └── README.md
-⚙️ How to Run Locally (2 minutes!)
-Prerequisites:
+```
 
-Docker & Docker Compose (only thing you need!)
+---
 
-Bash# 1. Clone it
+# ⚙️ Running the Project Locally
+
+## 1️⃣ Prerequisites
+
+Install:
+
+* Docker
+* Docker Compose
+
+Optional:
+
+* Node.js
+
+---
+
+## 2️⃣ Clone the Repository
+
+```
 git clone git@github.com:darkspywarrior/Multi-Container-Application.git
-cd todo-app-docker
+```
 
-# 2. Start everything
+```
+cd Multi-Container-Application
+```
+
+---
+
+## 3️⃣ Start the Application
+
+```
 docker compose up --build
-That's it! The app will be live at:
-http://localhost (thanks to Nginx)
-Swagger docs: http://localhost/api-docs
-Stop everything with:
-Bashdocker compose down
-🤝 Want to Contribute? (I would love it!)
-This is a student project and I'm actively looking for contributions to make my portfolio even stronger!
-Super beginner-friendly.
-How to help:
+```
 
-Fork the repo
-Create a branch: git checkout -b cool-feature
-Add something awesome (new feature, bug fix, better styling, tests, etc.)
-Commit & push
-Open a Pull Request
+This starts the following containers:
 
-Good first issues ideas:
+* API container
+* MongoDB container
+* Nginx reverse proxy
+* Prometheus monitoring
+* Grafana dashboard
+
+---
+
+## 4️⃣ Access Services
+
+| Service      | URL                            |
+| ------------ | ------------------------------ |
+| API          | http://localhost:3000          |
+| Swagger Docs | http://localhost:3000/api-docs |
+| Prometheus   | http://localhost:9090          |
+| Grafana      | http://localhost:3001          |
+
+---
+
+# 🛑 Stop the Application
+
+```
+docker compose down
+```
+
+---
+
+# 🔁 CI/CD Pipeline
+
+This project includes **GitHub Actions CI/CD**.
+
+Every push to the `main` branch triggers:
+
+1️⃣ Repository checkout
+2️⃣ Docker build
+3️⃣ Deployment process
+
+Workflow file:
+
+```
+.github/workflows/deploy.yml
+```
+
+---
+
+# 🌐 Reverse Proxy (Nginx)
+
+Nginx forwards external requests to the Node API.
+
+Request flow:
+
+```
+Client
+   │
+   ▼
+Nginx
+   │
+   ▼
+Node API
+   │
+   ▼
+MongoDB
+```
+
+Benefits:
+
+* Security
+* Clean routing
+* SSL support (future)
+
+---
+
+# 🔐 Environment Variables
+
+Create `.env` file:
+
+```
+MONGO_URL=mongodb://mongo:27017/todos
+PORT=3000
+```
+---
+
+# 🚀 Future Improvements
+
+Possible extensions:
+
+* JWT authentication
+* HTTPS with Let's Encrypt
+* Kubernetes deployment
+* Terraform infrastructure
+* Distributed tracing
+* Rate limiting
+* Load balancing
+
+---
+
+# 🤝 Contributing
+
+1️⃣ Fork the repository
+
+2️⃣ Create a new branch
+
+```
+git checkout -b feature-name
+```
+
+3️⃣ Commit changes
+
+```
+git commit -m "Add feature"
+```
+
+4️⃣ Push changes
+
+```
+git push origin feature-name
+```
+
+5️⃣ Open a Pull Request
+
+---
+
 
 Add user registration/login (JWT)
 Make it look prettier (React frontend?)
