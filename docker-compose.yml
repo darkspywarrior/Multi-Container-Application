@@ -18,6 +18,7 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+
   nginx:
     image: nginx:latest
     ports:
@@ -29,15 +30,16 @@ services:
       - ./certbot/www:/var/www/certbot
     depends_on:
       - api
-prometheus:
-  image: prom/prometheus
-  ports:
-    - "9090:9090"
 
-grafana:
-  image: grafana/grafana
-  ports:
-    - "3001:3000"
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - "3001:3000"
 
 volumes:
   mongo-data:
