@@ -15,6 +15,9 @@ const mongoURL = process.env.MONGO_URL;
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
+app.get("/", (req, res) => {
+  res.send("Todo API running 🚀");
+});
 
 app.use("/", todoRoutes);
 
