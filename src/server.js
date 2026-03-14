@@ -5,27 +5,43 @@ const todoRoutes = require("./routes/todoRoutes");
 const app = express();
 app.use(express.json());
 
+// Render provides PORT automatically
 const PORT = process.env.PORT || 3000;
+
+// MongoDB Atlas connection string from Render environment variable
 const mongoURL = process.env.MONGO_URL;
 
-// simple health route (helps Render checks)
+// Health check route (useful for Render or load balancers)
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
 app.use("/", todoRoutes);
 
+// Start server only after MongoDB connects
 async function startServer() {
   try {
     if (!mongoURL) {
-      throw new Error("MONGO_URL is not set");
+      throw new Error("MONGO_URL environment variable is missing");
     }
 
     await mongoose.connect(mongoURL);
+
     console.log("✅ MongoDB connected");
 
-    app.listen(PORT, () => {
+    const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
+    });
+
+    // Graceful shutdown
+    process.on("SIGTERM", () => {
+      console.log("SIGTERM received. Closing server...");
+      server.close(() => {
+        mongoose.connection.close(false, () => {
+          console.log("MongoDB connection closed.");
+          process.exit(0);
+        });
+      });
     });
 
   } catch (err) {

@@ -1,15 +1,15 @@
 {
   "name": "todo-devops-project",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "DevOps multi-container todo API",
+  "main": "src/server.js",
   "scripts": {
-  "start": "node src/server.js",
-  "dev": "nodemon src/server.js"
-},
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "express": "^5.2.1",
     "mongoose": "^9.3.0"
