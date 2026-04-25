@@ -1,3 +1,6 @@
 node_modules/
 target/
 .env
+blockchain/fabric/fabric-samples/
+blockchain/fabric/fabric-samples/
+test.txt
