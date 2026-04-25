@@ -1,0 +1,41 @@
+
+services:
+
+  mongo:
+    image: mongo:7
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+
+  api-blue:
+    build: .
+    container_name: api-blue
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/todos
+    ports:
+      - "3001:3000"
+    depends_on:
+      - mongo
+
+  api-green:
+    build: .
+    container_name: api-green
+    environment:
+      - MONGO_URL=mongodb://mongo:27017/todos
+    ports:
+      - "3002:3000"
+    depends_on:
+      - mongo
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "3000:80"
+    volumes:
+      - ./nginx/nginx-blue.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api-blue
+
+volumes:
+  mongo-data:
