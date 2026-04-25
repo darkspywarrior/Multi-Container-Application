@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrity | Blockchain Fingerprint</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:system-ui,-apple-system,'Segoe UI',monospace;background:#0a0e27;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+        .container{max-width:1000px;width:100%}
+        /* terminal header */
+        .terminal{background:#0f1222;border-radius:12px;border:1px solid rgba(0,255,255,0.2);overflow:hidden;margin-bottom:2rem}
+        .term-bar{background:#1a1f3a;padding:0.75rem 1rem;border-bottom:1px solid #2a2f4a;display:flex;gap:0.5rem}
+        .term-dot{width:12px;height:12px;border-radius:50%}.red{background:#ff5f56}.yellow{background:#ffbd2e}.green{background:#27c93f}
+        .term-title{flex:1;text-align:center;color:#6b7280;font-size:0.75rem;font-family:monospace}
+        .term-content{padding:1.5rem}
+        /* grid */
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+        /* cards */
+        .card{background:#0f1222;border:1px solid #1f2340;border-radius:12px;padding:1.5rem;transition:all 0.2s}
+        .card:hover{border-color:#2d3192;box-shadow:0 0 20px rgba(0,255,255,0.1)}
+        .card-title{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;color:#00ffff;font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+        .card-title .icon{font-size:1.5rem}
+        /* forms */
+        .file-area{position:relative;margin-bottom:1rem}
+        input[type="file"]{position:absolute;opacity:0;width:0;height:0}
+        .file-label{display:block;padding:1.5rem;background:#060918;border:2px dashed #2a2f4a;border-radius:8px;text-align:center;cursor:pointer;font-size:0.875rem;color:#8b92b0;transition:all 0.2s}
+        .file-label:hover{border-color:#00ffff;background:#0a0f22;color:#00ffff}
+        .file-name{font-size:0.75rem;color:#4a5568;margin-top:0.5rem;text-align:center;font-family:monospace;word-break:break-all}
+        button{width:100%;padding:0.75rem;background:linear-gradient(135deg,#00ffff,#0066ff);border:none;border-radius:8px;color:#0a0e27;font-weight:700;font-size:0.875rem;cursor:pointer;transition:opacity 0.2s;font-family:monospace;text-transform:uppercase;letter-spacing:1px}
+        button:disabled{opacity:0.5;cursor:not-allowed}
+        button:active{transform:scale(0.98)}
+        /* status */
+        .status{margin-top:1rem;padding:0.75rem;border-radius:6px;font-size:0.75rem;font-family:monospace;animation:slideIn 0.2s}
+        .success{background:#00ff0011;border-left:3px solid #00ff00;color:#00ff00}
+        .error{background:#ff000011;border-left:3px solid #ff0000;color:#ff6666}
+        .info{background:#00ffff11;border-left:3px solid #00ffff;color:#00ffff}
+        /* stats */
+        .stats{display:flex;gap:1rem;margin-top:1.5rem}
+        .stat{flex:1;background:#060918;border-radius:8px;padding:0.75rem;text-align:center}
+        .stat-label{font-size:0.625rem;color:#4a5568;text-transform:uppercase;margin-bottom:0.25rem}
+        .stat-value{font-size:0.875rem;color:#00ffff;font-family:monospace;font-weight:600}
+        /* animations */
+        @keyframes slideIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes blink{50%{opacity:0.5}}
+        .processing{animation:blink 1s infinite}
+        /* responsive */
+        @media (max-width:700px){.grid{grid-template-columns:1fr}}
+        .finger{font-size:0.7rem;text-align:center;margin-top:1.5rem;color:#2a2f4a;font-family:monospace}
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Terminal Header -->
+    <div class="terminal">
+        <div class="term-bar">
+            <div class="term-dot red"></div>
+            <div class="term-dot yellow"></div>
+            <div class="term-dot green"></div>
+            <div class="term-title">integrity@blockchain:~</div>
+        </div>
+        <div class="term-content">
+            <div style="color:#00ffff;font-size:0.75rem;font-family:monospace;margin-bottom:1rem">
+                🔐 FINGERPRINT TAMPER DETECTION | v1.0
+            </div>
+            <div class="grid">
+                <!-- Upload -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">📤</span>
+                        <span>REGISTER</span>
+                    </div>
+                    <form id="uploadForm">
+                        <div class="file-area">
+                            <input type="file" id="uploadFile" name="file">
+                            <label for="uploadFile" class="file-label" id="uploadLabel">
+                                📁 DROP OR CLICK
+                            </label>
+                            <div id="uploadFileName" class="file-name"></div>
+                        </div>
+                        <button type="submit" id="uploadBtn">⚡ STORE ON CHAIN</button>
+                    </form>
+                    <div id="uploadStatus"></div>
+                </div>
+
+                <!-- Verify -->
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">🔍</span>
+                        <span>VERIFY</span>
+                    </div>
+                    <form id="verifyForm">
+                        <div class="file-area">
+                            <input type="file" id="verifyFile" name="file">
+                            <label for="verifyFile" class="file-label" id="verifyLabel">
+                                🛡️ SELECT FILE
+                            </label>
+                            <div id="verifyFileName" class="file-name"></div>
+                        </div>
+                        <button type="submit" id="verifyBtn">🔎 CHECK INTEGRITY</button>
+                    </form>
+                    <div id="verifyStatus"></div>
+                </div>
+            </div>
+            
+            <!-- Stats -->
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">SECURITY</div>
+                    <div class="stat-value">SHA-256 + BC</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">IMMUTABLE</div>
+                    <div class="stat-value">HYPERLEDGER</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-label">TAMPER</div>
+                    <div class="stat-value">REAL-TIME ✓</div>
+                </div>
+            </div>
+            <div class="finger">
+                ⛓️ cryptographic fingerprint stored on blockchain | tamper-proof by design
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// file handlers
+function setupFileInput(inputId, labelId, nameId) {
+    const input = document.getElementById(inputId);
+    const nameDiv = document.getElementById(nameId);
+    input.addEventListener('change', () => {
+        if(input.files && input.files[0]) {
+            nameDiv.textContent = `📄 ${input.files[0].name} (${(input.files[0].size/1024).toFixed(1)}KB)`;
+            nameDiv.style.color = '#00ffff';
+        } else {
+            nameDiv.textContent = '';
+        }
+    });
+}
+
+setupFileInput('uploadFile', 'uploadLabel', 'uploadFileName');
+setupFileInput('verifyFile', 'verifyLabel', 'verifyFileName');
+
+function showStatus(divId, msg, type) {
+    const div = document.getElementById(divId);
+    div.innerHTML = `<div class="status ${type}">${msg}</div>`;
+    setTimeout(() => { if(div.innerHTML.includes(msg)) div.innerHTML = ''; }, 5000);
+}
+
+function setLoading(btnId, loading) {
+    const btn = document.getElementById(btnId);
+    if(loading) {
+        btn.disabled = true;
+        btn.innerHTML = '⚙️ PROCESSING...';
+    } else {
+        btn.disabled = false;
+        btn.innerHTML = btnId === 'uploadBtn' ? '⚡ STORE ON CHAIN' : '🔎 CHECK INTEGRITY';
+    }
+}
+
+// upload
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('uploadFile').files[0];
+    if(!file) { showStatus('uploadStatus', '❌ no file selected', 'error'); return; }
+    
+    const fd = new FormData();
+    fd.append('file', file);
+    setLoading('uploadBtn', true);
+    
+    try {
+        const res = await fetch('http://localhost:8082/file/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if(res.ok) showStatus('uploadStatus', `✅ REGISTERED: ${file.name} fingerprint on blockchain`, 'success');
+        else showStatus('uploadStatus', `❌ failed: ${data.error || 'unknown'}`, 'error');
+        document.getElementById('uploadFile').value = '';
+        document.getElementById('uploadFileName').textContent = '';
+    } catch(err) {
+        showStatus('uploadStatus', `❌ network error: ${err.message}`, 'error');
+    } finally {
+        setLoading('uploadBtn', false);
+    }
+});
+
+// verify
+document.getElementById('verifyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const file = document.getElementById('verifyFile').files[0];
+    if(!file) { showStatus('verifyStatus', '❌ no file selected', 'error'); return; }
+    
+    const fd = new FormData();
+    fd.append('file', file);
+    setLoading('verifyBtn', true);
+    
+    try {
+        const res = await fetch('http://localhost:8082/file/verify', { method: 'POST', body: fd });
+        const data = await res.json();
+        if(res.ok && data.verified) {
+            showStatus('verifyStatus', `✅ AUTHENTIC | file "${file.name}" is untampered`, 'success');
+        } else if(res.ok && !data.verified) {
+            showStatus('verifyStatus', `⚠️ TAMPER DETECTED | blockchain mismatch for "${file.name}"`, 'error');
+        } else {
+            showStatus('verifyStatus', `❌ verify failed: ${data.error || 'not found'}`, 'error');
+        }
+    } catch(err) {
+        showStatus('verifyStatus', `❌ network error: ${err.message}`, 'error');
+    } finally {
+        setLoading('verifyBtn', false);
+    }
+});
+</script>
+</body>
+</html>
