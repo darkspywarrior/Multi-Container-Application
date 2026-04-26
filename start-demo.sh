@@ -21,7 +21,7 @@ echo ""
 echo "[3] Starting Hyperledger Fabric..."
 cd blockchain/fabric/fabric-samples/test-network || exit
 
-./network.sh up createChannel -ca
+./network.sh up 
 
 echo ""
 echo "[4] Check containers..."
@@ -51,3 +51,5 @@ echo ""
 echo "Prometheus:"
 echo "http://localhost:9090"
 echo "=================================="
+echo "Ready:"
+echo http://localhost:8000
