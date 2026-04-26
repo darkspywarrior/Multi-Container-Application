@@ -6,33 +6,33 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/blockchain")
 public class BlockchainController {
 
-@GetMapping("/status")
-public String status() {
-return "✅ Hyperledger Fabric Connected";
-}
+    @GetMapping("/status")
+    public String status() {
+        return "✅ Hyperledger Fabric Connected";
+    }
 
-@PostMapping("/store")
-public String store() {
+    @PostMapping("/store")
+    public String store() {
 
-return """
-✅ Blockchain Store Successful
+        return """
+                ✅ Blockchain Store Successful
 
-Asset committed to Hyperledger Fabric
-Transaction endorsed
-Block committed
-Ledger updated
-""";
-}
+                Asset committed to Hyperledger Fabric
+                Transaction endorsed
+                Block committed
+                Ledger updated
+                """;
+    }
 
-@GetMapping("/verify")
-public String verify() {
+    @GetMapping("/verify")
+    public String verify() {
 
-return """
-✅ Blockchain Verification Successful
+        return """
+                ✅ Blockchain Verification Successful
 
-Hash matches blockchain record
-Integrity VALID
-""";
-}
+                Hash matches blockchain record
+                Integrity VALID
+                """;
+    }
 
 }
