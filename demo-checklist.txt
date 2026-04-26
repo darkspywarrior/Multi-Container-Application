@@ -1,0 +1,20 @@
+Before Demo:
+
+1 Run:
+./start-demo.sh
+
+2 Verify:
+docker ps
+
+3 Test:
+curl localhost:8082/blockchain/status
+
+4 Open:
+http://localhost:8000
+
+5 Demo flow:
+Upload file
+Verify file
+Query asset
+Run blockchain demo
+Show Grafana
