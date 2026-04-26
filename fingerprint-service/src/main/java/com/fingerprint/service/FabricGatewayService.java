@@ -1,25 +1,22 @@
 package com.fingerprint.service;
 
 import org.hyperledger.fabric.gateway.*;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.time.Instant;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class FabricGatewayService {
 
-    private static final Logger logger = LoggerFactory.getLogger(FabricGatewayService.class);
+    private static final Logger log = LoggerFactory.getLogger(FabricGatewayService.class);
 
     @Value("${fabric.connection.profile:fabric-config/connection-org1.json}")
     private String connectionProfile;
@@ -33,6 +30,7 @@ public class FabricGatewayService {
     private Gateway gateway;
     private Contract contract;
     private boolean useRealFabric = false;
+
     private final Map<String, BlockchainRecord> mockLedger = new ConcurrentHashMap<>();
 
     @PostConstruct
@@ -40,310 +38,198 @@ public class FabricGatewayService {
         try {
             connectToRealFabric();
             useRealFabric = true;
-            logger.info("✅ Connected to REAL Hyperledger Fabric network");
-            logger.info("   Channel: {}", channelName);
-            logger.info("   Contract: {}", contractName);
+
+            log.info("Fabric connectivity verified.");
+            log.info("✅ Connected to REAL Hyperledger Fabric");
+            log.info("Channel {}", channelName);
+            log.info("Contract {}", contractName);
+
         } catch (Exception e) {
-            logger.warn("⚠️ Could not connect to real Fabric: {}", e.getMessage());
-            logger.info("   Falling back to DEMO mode with in-memory ledger");
             useRealFabric = false;
+            log.warn("⚠ Fabric unavailable. Using demo mode");
+            log.warn(e.getMessage());
         }
     }
 
     private void connectToRealFabric() throws Exception {
-        // Path to MSP directory containing certs and keys
-        Path cryptoPath = Paths.get("/app/wallet/User1/msp");
 
-        // Read certificate
-        Path certPath = cryptoPath.resolve("signcerts/cert.pem");
-        if (!Files.exists(certPath)) {
-            throw new Exception("Certificate not found at: " + certPath);
-        }
+        Path crypto = Paths.get("/app/wallet/User1/msp");
 
-        // Find private key file in keystore directory
-        Path keyDir = cryptoPath.resolve("keystore");
-        Path privateKeyPath = Files.list(keyDir)
+        Path cert = crypto.resolve("signcerts/cert.pem");
+
+        Path keyDir = crypto.resolve("keystore");
+
+        Path privateKey = Files.list(keyDir)
                 .findFirst()
-                .orElseThrow(() -> new Exception("No private key found in: " + keyDir));
+                .orElseThrow();
 
-        // Create X509 identity using Org1MSP
-        Identity identityObj = Identities.newX509Identity(
+        Identity identity = Identities.newX509Identity(
                 "Org1MSP",
-                Identities.readX509Certificate(Files.newBufferedReader(certPath)),
-                Identities.readPrivateKey(Files.newBufferedReader(privateKeyPath)));
+                Identities.readX509Certificate(
+                        Files.newBufferedReader(cert)),
+                Identities.readPrivateKey(
+                        Files.newBufferedReader(privateKey)));
 
-        // Load connection profile
-        Path connectionPath = Paths.get(connectionProfile);
-
-        // Create gateway connection with direct identity
         gateway = Gateway.createBuilder()
-                .identity(identityObj)
-                .networkConfig(connectionPath)
+                .identity(identity)
+                .networkConfig(Paths.get(connectionProfile))
                 .connect();
 
-        // Get network and contract
         Network network = gateway.getNetwork(channelName);
+
         contract = network.getContract(contractName);
 
-        // Test connection
-        byte[] testResult = contract.evaluateTransaction("GetAllFiles");
-        logger.info("   Connection test successful");
+        contract.evaluateTransaction("GetAllFiles");
     }
 
     @PreDestroy
     public void cleanup() {
         if (gateway != null) {
             gateway.close();
-            logger.info("Fabric Gateway connection closed");
         }
     }
 
-    public String storeHash(String fileName, String fileHash) {
-        String assetId = "asset_" + UUID.randomUUID().toString().substring(0, 8);
-        String timestamp = Instant.now().toString();
+    /*
+     * =========================
+     * STORE HASH FIXED
+     * =========================
+     */
+
+    public String storeHash(String fileName, String hash) {
+
+        String assetId = fileName; // IMPORTANT FIX
+        String ts = Instant.now().toString();
 
         if (useRealFabric) {
-            return storeOnRealFabric(assetId, fileName, fileHash, timestamp);
-        } else {
-            return storeOnMockLedger(assetId, fileName, fileHash, timestamp);
+            return storeReal(
+                    assetId,
+                    fileName,
+                    hash,
+                    ts);
         }
+
+        return storeDemo(
+                assetId,
+                fileName,
+                hash,
+                ts);
     }
 
-    private String storeOnRealFabric(String assetId, String fileName, String fileHash, String timestamp) {
-        try {
-            logger.info("Submitting transaction to Fabric - Asset: {}", assetId);
+    private String storeReal(
+            String assetId,
+            String fileName,
+            String hash,
+            String ts) {
 
-            byte[] result = contract.submitTransaction(
+        try {
+
+            contract.submitTransaction(
                     "StoreHash",
                     assetId,
                     fileName,
-                    fileHash,
-                    "User1");
+                    hash,
+                    "Ira");
 
-            String txId = "tx_" + UUID.randomUUID().toString().substring(0, 16);
-
-            logger.info("✅ Transaction committed - Asset: {}", assetId);
-
-            return String.format(
-                    "✅ BLOCKCHAIN STORED SUCCESSFULLY (REAL FABRIC)\n" +
-                            "   ├── Transaction ID: %s\n" +
-                            "   ├── Asset ID: %s\n" +
-                            "   ├── File: %s\n" +
-                            "   ├── Hash: %s\n" +
-                            "   ├── Timestamp: %s\n" +
-                            "   ├── Response: %s\n" +
-                            "   └── Status: COMMITTED to REAL LEDGER",
-                    txId, assetId, fileName,
-                    fileHash.substring(0, Math.min(32, fileHash.length())) + "...",
-                    timestamp,
-                    new String(result));
+            return "✅ BLOCKCHAIN STORED SUCCESSFULLY (REAL FABRIC)\n" +
+                    "Transaction ID: tx-" + System.currentTimeMillis() + "\n" +
+                    "Asset ID: " + assetId + "\n" +
+                    "File: " + fileName + "\n" +
+                    "Hash: " + hash + "\n" +
+                    "Timestamp: " + ts + "\n" +
+                    "Status: COMMITTED to REAL LEDGER";
 
         } catch (Exception e) {
-            logger.error("Fabric transaction failed", e);
-            return String.format(
-                    "❌ BLOCKCHAIN STORAGE FAILED\n" +
-                            "   ├── Error: %s\n" +
-                            "   └── Falling back to verification mode",
-                    e.getMessage());
+            return "Fabric write failed: " + e.getMessage();
         }
     }
 
-    private String storeOnMockLedger(String assetId, String fileName, String fileHash, String timestamp) {
-        try {
-            BlockchainRecord record = new BlockchainRecord();
-            record.assetId = assetId;
-            record.fileName = fileName;
-            record.fileHash = fileHash;
-            record.timestamp = timestamp;
-            record.transactionId = "tx_" + UUID.randomUUID().toString().substring(0, 16);
-            record.blockNumber = mockLedger.size() + 1;
+    private String storeDemo(
+            String assetId,
+            String fileName,
+            String hash,
+            String ts) {
 
-            mockLedger.put(assetId, record);
+        BlockchainRecord r = new BlockchainRecord();
 
-            return String.format(
-                    "✅ BLOCKCHAIN STORED SUCCESSFULLY (DEMO MODE)\n" +
-                            "   ├── Transaction ID: %s\n" +
-                            "   ├── Asset ID: %s\n" +
-                            "   ├── Block Number: %d\n" +
-                            "   ├── File: %s\n" +
-                            "   ├── Hash: %s\n" +
-                            "   ├── Timestamp: %s\n" +
-                            "   └── Status: COMMITTED to DEMO Ledger",
-                    record.transactionId, assetId, record.blockNumber,
-                    fileName, fileHash.substring(0, Math.min(16, fileHash.length())) + "...", timestamp);
+        r.assetId = assetId;
+        r.fileName = fileName;
+        r.fileHash = hash;
+        r.timestamp = ts;
+        r.blockNumber = mockLedger.size() + 1;
 
-        } catch (Exception e) {
-            return "❌ BLOCKCHAIN STORAGE FAILED\n" +
-                    "   Error: " + e.getMessage();
-        }
+        mockLedger.put(assetId, r);
+
+        return "DEMO BLOCK COMMIT SUCCESS\n" +
+                "Asset " + assetId;
     }
 
-    public String verifyHash(String fileName, String newHash, String originalHash) {
+    public String verifyHash(
+            String fileName,
+            String newHash,
+            String oldHash) {
+
         if (useRealFabric) {
-            return verifyOnRealFabric(fileName, newHash, originalHash);
-        } else {
-            return verifyOnMockLedger(fileName, newHash, originalHash);
-        }
-    }
+            try {
 
-    private String verifyOnRealFabric(String fileName, String newHash, String originalHash) {
-        try {
-            byte[] result = contract.evaluateTransaction("GetHash", fileName);
-            String storedHash = new String(result);
+                byte[] r = contract.evaluateTransaction(
+                        "GetHash",
+                        fileName);
 
-            if (storedHash.equals(originalHash)) {
-                if (originalHash.equals(newHash)) {
-                    return String.format(
-                            "✅ VERIFIED on REAL BLOCKCHAIN\n" +
-                                    "   ├── Status: IMMUTABLE ✓\n" +
-                                    "   ├── Integrity: INTACT\n" +
-                                    "   └── Hash Match: CONFIRMED");
-                } else {
-                    return String.format(
-                            "❌ TAMPER DETECTED on REAL BLOCKCHAIN\n" +
-                                    "   ├── Status: MISMATCH ⚠️\n" +
-                                    "   ├── Original: %s\n" +
-                                    "   ├── Current: %s\n" +
-                                    "   └── Integrity: COMPROMISED",
-                            originalHash.substring(0, 16) + "...",
-                            newHash.substring(0, 16) + "...");
-                }
-            } else {
-                return "❌ NOT FOUND on REAL BLOCKCHAIN\n" +
-                        "   └── Upload file first using /file/upload";
+                String chainHash = new String(r).trim();
+
+                return chainHash.equals(newHash)
+                        ? "VALID ✓"
+                        : "TAMPERED ✗";
+
+            } catch (Exception e) {
+                return "Blockchain verify failed: " +
+                        e.getMessage();
             }
-
-        } catch (Exception e) {
-            return "⚠️ VERIFICATION FAILED: " + e.getMessage();
         }
-    }
 
-    private String verifyOnMockLedger(String fileName, String newHash, String originalHash) {
-        try {
-            boolean found = false;
-            String matchedAssetId = "";
-            BlockchainRecord matchedRecord = null;
-
-            for (BlockchainRecord record : mockLedger.values()) {
-                if (record.fileHash.equals(originalHash)) {
-                    found = true;
-                    matchedAssetId = record.assetId;
-                    matchedRecord = record;
-                    break;
-                }
-            }
-
-            if (found) {
-                if (originalHash.equals(newHash)) {
-                    return String.format(
-                            "✅ VERIFIED on DEMO BLOCKCHAIN\n" +
-                                    "   ├── Asset ID: %s\n" +
-                                    "   ├── Block: #%d\n" +
-                                    "   ├── Status: IMMUTABLE ✓\n" +
-                                    "   └── Integrity: INTACT",
-                            matchedAssetId, matchedRecord.blockNumber);
-                } else {
-                    return String.format(
-                            "❌ TAMPER DETECTED on DEMO BLOCKCHAIN\n" +
-                                    "   ├── Asset ID: %s\n" +
-                                    "   ├── Block: #%d\n" +
-                                    "   ├── Status: MISMATCH ⚠️\n" +
-                                    "   └── Integrity: COMPROMISED",
-                            matchedAssetId, matchedRecord.blockNumber);
-                }
-            } else {
-                return "❌ NOT FOUND on DEMO BLOCKCHAIN\n" +
-                        "   └── Upload file first using /file/upload";
-            }
-
-        } catch (Exception e) {
-            return "❌ VERIFICATION FAILED\n" +
-                    "   Error: " + e.getMessage();
-        }
+        return oldHash.equals(newHash)
+                ? "VALID ✓"
+                : "TAMPERED ✗";
     }
 
     public String getAllBlockchainRecords() {
+
         if (useRealFabric) {
-            return getAllFromRealFabric();
-        } else {
-            return getAllFromMockLedger();
-        }
-    }
-
-    private String getAllFromRealFabric() {
-        try {
-            byte[] result = contract.evaluateTransaction("GetAllFiles");
-            return "=== REAL BLOCKCHAIN LEDGER ===\n" +
-                    String.format("Connected to: %s\n", channelName) +
-                    String.format("Contract: %s\n\n", contractName) +
-                    "Blockchain Data:\n" +
-                    new String(result);
-        } catch (Exception e) {
-            return "Error querying blockchain: " + e.getMessage();
-        }
-    }
-
-    private String getAllFromMockLedger() {
-        if (mockLedger.isEmpty()) {
-            return "No records found on demo blockchain";
+            try {
+                return new String(
+                        contract.evaluateTransaction(
+                                "GetAllFiles"));
+            } catch (Exception e) {
+                return e.getMessage();
+            }
         }
 
-        StringBuilder result = new StringBuilder();
-        result.append("=== DEMO BLOCKCHAIN LEDGER ===\n");
-        result.append(String.format("Total Transactions: %d\n\n", mockLedger.size()));
-
-        for (BlockchainRecord record : mockLedger.values()) {
-            result.append(String.format(
-                    "Asset ID: %s\n" +
-                            "  ├── Transaction: %s\n" +
-                            "  ├── Block: #%d\n" +
-                            "  ├── File: %s\n" +
-                            "  ├── Hash: %s\n" +
-                            "  └── Time: %s\n\n",
-                    record.assetId, record.transactionId, record.blockNumber,
-                    record.fileName,
-                    record.fileHash.substring(0, Math.min(32, record.fileHash.length())) + "...",
-                    record.timestamp));
-        }
-
-        return result.toString();
+        return "Demo tx count " +
+                mockLedger.size();
     }
 
     public String getBlockchainStatus() {
+
         if (useRealFabric) {
             return """
-                    ╔════════════════════════════════════════════╗
-                    ║     REAL HYPERLEDGER FABRIC STATUS         ║
-                    ╠════════════════════════════════════════════╣
-                    ║  Connection: ACTIVE ✅                      ║
-                    ║  Mode: PRODUCTION                          ║
-                    ║  Channel: %-30s ║
-                    ║  Contract: %-29s ║
-                    ║  Security: TLS 1.3                         ║
-                    ║  Algorithm: SHA-256                        ║
-                    ╚════════════════════════════════════════════╝
-                    """.formatted(channelName, contractName);
-        } else {
-            return """
-                    ╔════════════════════════════════════════════╗
-                    ║        DEMO MODE - BLOCKCHAIN STATUS       ║
-                    ╠════════════════════════════════════════════╣
-                    ║  Connection: DEMO MODE ⚠️                   ║
-                    ║  Mode: SIMULATED LEDGER                    ║
-                    ║  Records: %-32d ║
-                    ║  Ready for: REAL FABRIC CONNECTION         ║
-                    ║  Next Step: Configure wallet + certs       ║
-                    ╚════════════════════════════════════════════╝
-                    """.formatted(mockLedger.size());
+                    REAL FABRIC ACTIVE
+                    Channel: mychannel
+                    Contract: fingerprint
+                    Status: CONNECTED
+                    """;
         }
+
+        return """
+                DEMO MODE
+                Status: FALLBACK
+                """;
     }
 
-    private static class BlockchainRecord {
+    static class BlockchainRecord {
         String assetId;
         String fileName;
         String fileHash;
         String timestamp;
-        String transactionId;
         int blockNumber;
     }
 }

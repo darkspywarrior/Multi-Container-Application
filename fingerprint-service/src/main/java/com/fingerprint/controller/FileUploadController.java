@@ -5,6 +5,7 @@ import com.fingerprint.service.FabricGatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fingerprint.service.MinioService;
 
 @RestController
 @RequestMapping("/file")
@@ -18,40 +19,33 @@ public class FileUploadController {
 
     private String storedHash;
     private String storedFileName;
+
     private String storedTransactionId;
+    @Autowired
+    private MinioService minioService;
 
     @PostMapping("/upload")
-    public String upload(@RequestParam("file") MultipartFile file) throws Exception {
+    public String upload(
+            @RequestParam("file") MultipartFile file)
+            throws Exception {
 
-        // Generate hash from uploaded file
-        storedHash = fingerprintService.generateFileHash(file.getInputStream());
+        minioService.uploadFile(file);
+
+        storedHash = fingerprintService.generateFileHash(
+                file.getInputStream());
+
         storedFileName = file.getOriginalFilename();
 
-        // Store hash on blockchain via Fabric Gateway
         String blockchainReceipt = fabricGatewayService.storeHash(
                 storedFileName,
                 storedHash);
 
-        // Extract transaction ID from receipt for tracking
-        if (blockchainReceipt.contains("Transaction ID:")) {
-            String[] lines = blockchainReceipt.split("\n");
-            for (String line : lines) {
-                if (line.contains("Transaction ID:")) {
-                    storedTransactionId = line.substring(line.indexOf(":") + 2).trim();
-                    break;
-                }
-            }
-        } else {
-            storedTransactionId = "tx_" + System.currentTimeMillis();
-        }
+        storedTransactionId = "tx-" + System.currentTimeMillis();
 
-        // Return complete response
         return "=== FILE PROCESSED ===\n" +
                 "File Name: " + storedFileName + "\n" +
-                "File Size: " + file.getSize() + " bytes\n" +
                 "SHA-256 Hash: " + storedHash + "\n" +
                 "Transaction ID: " + storedTransactionId + "\n\n" +
-                "=== BLOCKCHAIN RESULT ===\n" +
                 blockchainReceipt;
     }
 
