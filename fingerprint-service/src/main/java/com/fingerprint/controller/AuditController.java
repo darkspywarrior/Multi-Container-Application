@@ -4,6 +4,8 @@ import com.fingerprint.service.FabricGatewayService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/audit")
 public class AuditController {
@@ -15,23 +17,24 @@ public class AuditController {
     public String auditTrail() {
         return fabricGatewayService.getAllBlockchainRecords();
     }
-    
+
+    @GetMapping("/status")
+    public String blockchainStatus() {
+        return fabricGatewayService.getBlockchainStatus();
+    }
+
     @GetMapping("/stats")
-    public String stats() {
-        return """
-            ╔══════════════════════════════════════╗
-            ║   BLOCKCHAIN INTEGRITY STATISTICS    ║
-            ╠══════════════════════════════════════╣
-            ║  Status: ACTIVE                      ║
-            ║  Network: Hyperledger Fabric         ║
-            ║  Channel: mychannel                  ║
-            ║  Chaincode: fingerprint              ║
-            ║  Version: 2.0                        ║
-            ║  Peers: 2 (Org1, Org2)               ║
-            ║  Orderer: 1 Active                   ║
-            ║  Security: TLS 1.3                   ║
-            ║  Algorithm: SHA-256                  ║
-            ╚══════════════════════════════════════╝
-            """;
+    public Map<String, Object> stats() {
+
+        return Map.of(
+                "status", "ACTIVE",
+                "network", "Hyperledger Fabric",
+                "channel", "mychannel",
+                "chaincode", "fingerprint",
+                "version", "2.0",
+                "organizations", 2,
+                "orderers", 1,
+                "security", "TLS 1.3",
+                "hashAlgorithm", "SHA-256");
     }
 }

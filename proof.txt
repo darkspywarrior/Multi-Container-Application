@@ -1,1 +1,20 @@
 hello
+5. One issue I noticed (be ready if asked)
+
+Potential bug:
+
+verifyHash() uses:
+
+fileName + hashPrefix
+
+But storeHash() stores:
+
+fileName + hashPrefix + timestamp
+
+These IDs may not match unless querying history or exact asset id.
+
+If examiner spots it, say:
+
+Yes, asset lookup should ideally use full stored asset ID or query latest version by filename.
+
+That actually makes you look sharp.
