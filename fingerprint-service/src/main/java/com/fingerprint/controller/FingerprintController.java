@@ -1,81 +1,33 @@
 package com.fingerprint.controller;
 
 import com.fingerprint.service.FingerprintService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/fingerprint")
 public class FingerprintController {
 
-    @Autowired
-    private FingerprintService fingerprintService;
+    private final FingerprintService fingerprintService;
 
-    private static final Set<String> SUPPORTED = Set.of("SHA-256", "SHA-512", "SHA-1", "MD5");
-
-    // Example:
-    // POST /fingerprint/hash
-    // {
-    // "algorithm":"SHA-256",
-    // "data":"hello"
-    // }
-
-    @PostMapping("/hash")
-    public ResponseEntity<?> hash(@RequestBody HashRequest request) {
-
-        try {
-
-            String algorithm = request.getAlgorithm().toUpperCase();
-
-            if (!SUPPORTED.contains(algorithm)) {
-                return ResponseEntity.badRequest().body(
-                        Map.of(
-                                "error", "Unsupported algorithm",
-                                "supported", SUPPORTED));
-            }
-
-            String hash = fingerprintService.generateHash(
-                    algorithm,
-                    request.getData());
-
-            return ResponseEntity.ok(
-                    Map.of(
-                            "algorithm", algorithm,
-                            "data", request.getData(),
-                            "hash", hash,
-                            "status", "success"));
-
-        } catch (Exception e) {
-
-            return ResponseEntity.internalServerError().body(
-                    Map.of(
-                            "error", e.getMessage()));
-        }
+    public FingerprintController(FingerprintService fingerprintService) {
+        this.fingerprintService = fingerprintService;
     }
 
-    public static class HashRequest {
+    @GetMapping("/{algorithm}/{data}")
+    public Map<String, String> hash(
+            @PathVariable String algorithm,
+            @PathVariable String data) throws Exception {
 
-        private String algorithm;
-        private String data;
+        String hash = fingerprintService.generateHash(algorithm, data);
 
-        public String getAlgorithm() {
-            return algorithm;
-        }
+        Map<String, String> res = new HashMap<>();
+        res.put("algorithm", algorithm);
+        res.put("data", data);
+        res.put("hash", hash);
 
-        public void setAlgorithm(String algorithm) {
-            this.algorithm = algorithm;
-        }
-
-        public String getData() {
-            return data;
-        }
-
-        public void setData(String data) {
-            this.data = data;
-        }
+        return res;
     }
 }

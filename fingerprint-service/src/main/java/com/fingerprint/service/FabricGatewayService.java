@@ -122,6 +122,22 @@ public class FabricGatewayService {
     }
 
     /*
+     * Check if content hash already exists before storing (prevents duplicate
+     * content)
+     */
+    public boolean hashExists(String hash) {
+        if (useRealFabric) {
+            try {
+                String allRecords = new String(contract.evaluateTransaction("GetAllFiles"));
+                return allRecords.contains(hash);
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return mockLedger.values().stream().anyMatch(r -> r.fileHash.equals(hash));
+    }
+
+    /*
      * Store hash with unique asset ID (always creates new record, never conflicts)
      */
     public String storeHash(String fileName, String hash) {
@@ -147,6 +163,18 @@ public class FabricGatewayService {
                     "Use updateHash() to modify or storeHash() to create new version";
         }
 
+        return storeHash(fileName, hash);
+    }
+
+    /*
+     * Smart store - avoids duplicate content across different filenames
+     * Prevents storing the exact same file content multiple times
+     */
+    public String storeHashIfContentNew(String fileName, String hash) {
+        if (hashExists(hash)) {
+            return "⚠️ This file content already exists on blockchain.\n" +
+                    "Skipping duplicate storage. Use updateHash() if you want new version.";
+        }
         return storeHash(fileName, hash);
     }
 
