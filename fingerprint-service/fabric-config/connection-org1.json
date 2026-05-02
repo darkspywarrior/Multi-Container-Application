@@ -16,21 +16,34 @@
   "organizations": {
     "Org1": {
       "mspid": "Org1MSP",
-      "peers": ["peer0.org1.example.com"]
+      "peers": [
+        "peer0.org1.example.com"
+      ],
+      "certificateAuthorities": [
+        "ca.org1.example.com"
+      ]
     }
   },
 
   "peers": {
     "peer0.org1.example.com": {
       "url": "grpcs://peer0.org1.example.com:7051",
-
       "tlsCACerts": {
-        "path": "/app/fabric-config/org1-tls.pem"
+        "path": "/app/fabric-config/peer0-tls.pem"
       },
-
       "grpcOptions": {
         "ssl-target-name-override": "peer0.org1.example.com",
         "hostnameOverride": "peer0.org1.example.com"
+      }
+    }
+  },
+
+  "certificateAuthorities": {
+    "ca.org1.example.com": {
+      "url": "https://ca.org1:7054",
+      "caName": "ca-org1",
+      "httpOptions": {
+        "verify": false
       }
     }
   }

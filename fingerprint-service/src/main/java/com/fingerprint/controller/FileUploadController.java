@@ -21,6 +21,7 @@ public class FileUploadController {
     private String storedFileName;
 
     private String storedTransactionId;
+
     @Autowired
     private MinioService minioService;
 
@@ -28,6 +29,23 @@ public class FileUploadController {
     public String upload(
             @RequestParam("file") MultipartFile file)
             throws Exception {
+
+        // ✅ Input validation
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Empty file not allowed");
+        }
+
+        // ✅ File type validation
+        String name = file.getOriginalFilename().toLowerCase();
+
+        java.util.List<String> allowedTypes = java.util.List.of(
+                ".txt", ".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg");
+
+        boolean valid = allowedTypes.stream().anyMatch(name::endsWith);
+
+        if (!valid) {
+            throw new RuntimeException("Invalid file type");
+        }
 
         minioService.uploadFile(file);
 
@@ -46,6 +64,13 @@ public class FileUploadController {
                 "File Name: " + storedFileName + "\n" +
                 "SHA-256 Hash: " + storedHash + "\n" +
                 "Transaction ID: " + storedTransactionId + "\n\n" +
+
+                "=== OFF-CHAIN STORAGE ===\n" +
+                "✅ Stored in MinIO Object Storage\n" +
+                "Bucket: fingerprints\n" +
+                "Object: " + storedFileName + "\n\n" +
+
+                "=== BLOCKCHAIN RESULT ===\n" +
                 blockchainReceipt;
     }
 
@@ -57,17 +82,14 @@ public class FileUploadController {
                     "Use POST /file/upload to upload and store a file hash on the blockchain.";
         }
 
-        // Generate hash from verification file
         String newHash = fingerprintService.generateFileHash(file.getInputStream());
         String currentFileName = file.getOriginalFilename();
 
-        // Verify against blockchain
         String verificationResult = fabricGatewayService.verifyHash(
                 currentFileName,
                 newHash,
                 storedHash);
 
-        // Local comparison with detailed output
         if (storedHash.equals(newHash)) {
             return "=== VERIFICATION RESULT ===\n" +
                     "╔════════════════════════════════════════╗\n" +
@@ -105,12 +127,8 @@ public class FileUploadController {
 
     @PostMapping("/upload-and-verify")
     public String uploadAndVerify(@RequestParam("file") MultipartFile file) throws Exception {
-        // First upload
         String uploadResult = upload(file);
-
-        // Then verify the same file
         String verifyResult = verify(file);
-
         return uploadResult + "\n\n" + verifyResult;
     }
 
@@ -156,6 +174,22 @@ public class FileUploadController {
                 ║  ⚙️  GET   /fabric/status                                ║
                 ║      - Check Fabric network connection status            ║
                 ╚══════════════════════════════════════════════════════════╝
+                """;
+    }
+
+    @GetMapping("/architecture")
+    public String architecture() {
+        return """
+                HYBRID STORAGE MODEL
+
+                File Binary  -> MinIO Object Storage
+                SHA256 Hash  -> Hyperledger Fabric
+
+                Benefits:
+                - Immutable integrity
+                - Tamper detection
+                - Off-chain scalable storage
+                - Blockchain audit trail
                 """;
     }
 

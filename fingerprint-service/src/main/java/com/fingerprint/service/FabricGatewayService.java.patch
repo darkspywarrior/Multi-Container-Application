@@ -1,9 +1,0 @@
-// Change the connection profile loading to support both Docker and local
-// In connectToRealFabric() method, replace Paths.get(connectionProfile) with:
-
-// For local development:
-InputStream is = getClass().getResourceAsStream("/connection-org1.json");
-if (is == null) {
-    // Fall back to file path for Docker
-    Paths.get(connectionProfile);
-}

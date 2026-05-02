@@ -1,0 +1,4 @@
+kismat
+nasha curl -F file=@0100.txt http://localhost:8082/file/verify
+nasha curl -F file=@0100.txt http://localhost:8082/file/verify
+nasha

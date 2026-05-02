@@ -7,44 +7,41 @@ import java.security.MessageDigest;
 @Service
 public class FingerprintService {
 
-public String generateHash(String algorithm,String data) throws Exception{
-MessageDigest digest=
-MessageDigest.getInstance(algorithm);
+        public String generateHash(String algorithm, String data) throws Exception {
+                MessageDigest digest = MessageDigest.getInstance(algorithm);
 
-return bytesToHex(
-digest.digest(data.getBytes("UTF-8"))
-);
-}
+                return bytesToHex(
+                                digest.digest(data.getBytes("UTF-8")));
+        }
 
-public String generateFileHash(InputStream inputStream) throws Exception{
+        public String generateFileHash(InputStream inputStream) throws Exception {
 
-MessageDigest digest=
-MessageDigest.getInstance("SHA-256");
+                MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
-byte[] buffer=new byte[4096];
-int read;
+                byte[] buffer = new byte[4096];
+                int read;
 
-while((read=inputStream.read(buffer))!=-1){
-digest.update(buffer,0,read);
-}
+                while ((read = inputStream.read(buffer)) != -1) {
+                        digest.update(buffer, 0, read);
+                }
 
-return bytesToHex(digest.digest());
-}
+                return bytesToHex(digest.digest());
+        }
 
-private String bytesToHex(byte[] bytes){
+        private String bytesToHex(byte[] bytes) {
 
-StringBuilder sb=new StringBuilder();
+                StringBuilder sb = new StringBuilder();
 
-for(byte b:bytes){
-String hex=Integer.toHexString(0xff & b);
+                for (byte b : bytes) {
+                        String hex = Integer.toHexString(0xff & b);
 
-if(hex.length()==1){
-sb.append('0');
-}
+                        if (hex.length() == 1) {
+                                sb.append('0');
+                        }
 
-sb.append(hex);
-}
+                        sb.append(hex);
+                }
 
-return sb.toString();
-}
+                return sb.toString();
+        }
 }
